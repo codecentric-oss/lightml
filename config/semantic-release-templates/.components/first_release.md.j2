@@ -1,0 +1,19 @@
+{% from "macros.md.j2" import generate_heading_underline %}{#
+
+# vX.X.X (YYYY-MMM-DD)
+## Unreleased
+
+* Initial Release
+
+#}{% set version_header = "%s (%s)" | format(
+        release.version.as_semver_tag(),
+        release.tagged_date.strftime("%Y-%m-%d")
+      )
+%}
+
+{{- "# " ~ release.version.as_semver_tag() }}
+
+{{ version_header }}
+{{ generate_heading_underline(version_header, "#") }}
+
+* Initial Release
