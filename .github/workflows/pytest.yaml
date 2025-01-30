@@ -29,21 +29,20 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
-
       - name: 🧙‍Install tox
         run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh
-      - name: Install Python
+      - name: 🐍 Install Python
         if: matrix.env != '3.14'
         run: uv python install --python-preference only-managed ${{ matrix.env }}
-      - name: Setup test suite
+      - name: 🛠️Setup test suite
         run: tox run --notest --skip-missing-interpreters false
         env:
           TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
-      - name: Run test suite
+      - name: 🏃 Run test suite
         run: tox run --skip-pkg-install
         env:
           TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
-      - name: Surface failing tests
+      - name: 📃 Test results
         if: always()
         uses: pmeier/pytest-results-action@main
         with:
@@ -64,34 +63,3 @@ jobs:
 
           # (Optional) Title of the test results section in the workflow summary
           title: Test results
-#      - run: mkdir results && touch results/tests-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md
-#      - name: 🧪 Run tests
-#        uses: nuhrberg/pytest-summary@main
-#        with:
-#          extensions: pytest-cov
-#          options: --doctest-modules --cov-report term --cov-report xml:results/coverage-${{ matrix.python-version }}-${{matrix.os}}.xml --cov=niceml
-#          paths: tests/**
-#          output: results/tests-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md
-#          show: "fail, skip"
-#      - name: ⬆️ Upload pytest results
-#        uses: actions/upload-artifact@v3
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          name: pytest-results-${{ matrix.python-version }}-${{matrix.os}}
-#          path: |
-#            results
-#            .test_report.xml
-#        # Use always() to always run this step to publish tests results when there are tests failures
-#        if: ${{ always() }}
-#      - name: 🖊️ Write job summary
-#        run: |
-#          echo "# 🧪 Test summary for python ${{ matrix.python-version }}-${{matrix.os}}" >> $GITHUB_STEP_SUMMARY
-#          if [[ "${{matrix.os}}" == "windows-latest" ]]
-#          then
-#            type results/test-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md >> $GITHUB_STEP_SUMMARY
-#          else
-#            cat results/test-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md >> $GITHUB_STEP_SUMMARY
-#          fi
-#        shell: bash
-#        if: ${{ always() }}

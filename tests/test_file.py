@@ -23,4 +23,4 @@ from lightml.dummyfunctions import dummyfunction
 
 
 def test_dummy_function():
-    assert dummyfunction() == 1
+    assert dummyfunction() == 0
