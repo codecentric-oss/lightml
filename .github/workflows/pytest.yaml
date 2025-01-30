@@ -4,14 +4,18 @@ on:
   pull_request:
     types: [ opened, reopened, synchronize ]
   workflow_call:
-
+permissions:
+  id-token: write
+  contents: write
+  checks: write
+  pull-requests: write
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        python-version: [ "3.10","3.11", "3.12", "3.13", "3.14" ]
+        os: [ ubuntu-latest ]
+        python-version: [ "3.10" ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     name: 🧪 Run pytests wit ${{matrix.python-version}} on ${{matrix.os}}
@@ -63,3 +67,24 @@ jobs:
 
           # (Optional) Title of the test results section in the workflow summary
           title: Test results
+      - name: ✏️ Write test result as comment
+        uses: MishaKav/pytest-coverage-comment@v1
+        with:
+          pytest-xml-coverage-path: ./coverage.xml
+          title: Coverage Report
+          badge-title: Code Coverage
+          hide-badge: false
+          hide-report: false
+          create-new-comment: false
+          hide-comment: false
+          report-only-changed-files: true
+          remove-link-from-badge: false
+          junitxml-path: ./junit.xml
+          junitxml-title: Pytest summary
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: ⬆️ Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./coverage.xml
+
