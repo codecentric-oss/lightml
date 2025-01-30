@@ -1,0 +1,97 @@
+name: 🧪 pytest
+
+on:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+  workflow_call:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python-version: [ "3.10","3.11", "3.12", "3.13", "3.14" ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    name: 🧪 Run pytests wit ${{matrix.python-version}} on ${{matrix.os}}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+      - name: 🧙‍♂️Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          python-version: ${{matrix.python-version}}
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: 🪟 Add .local/bin to Windows PATH
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
+
+      - name: 🧙‍Install tox
+        run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh
+      - name: Install Python
+        if: matrix.env != '3.14'
+        run: uv python install --python-preference only-managed ${{ matrix.env }}
+      - name: Setup test suite
+        run: tox run --notest --skip-missing-interpreters false
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      - name: Run test suite
+        run: tox run --skip-pkg-install
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      - name: Surface failing tests
+        if: always()
+        uses: pmeier/pytest-results-action@main
+        with:
+          # A list of JUnit XML files, directories containing the former, and wildcard
+          # patterns to process.
+          # See @actions/glob for supported patterns.
+          path: ./junit.xml
+
+          # (Optional) Add a summary of the results at the top of the report
+          summary: true
+
+          # (Optional) Select which results should be included in the report.
+          # Follows the same syntax as `pytest -r`
+          display-options: fEX
+
+          # (Optional) Fail the workflow if no JUnit XML was found.
+          fail-on-empty: true
+
+          # (Optional) Title of the test results section in the workflow summary
+          title: Test results
+#      - run: mkdir results && touch results/tests-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md
+#      - name: 🧪 Run tests
+#        uses: nuhrberg/pytest-summary@main
+#        with:
+#          extensions: pytest-cov
+#          options: --doctest-modules --cov-report term --cov-report xml:results/coverage-${{ matrix.python-version }}-${{matrix.os}}.xml --cov=niceml
+#          paths: tests/**
+#          output: results/tests-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md
+#          show: "fail, skip"
+#      - name: ⬆️ Upload pytest results
+#        uses: actions/upload-artifact@v3
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          name: pytest-results-${{ matrix.python-version }}-${{matrix.os}}
+#          path: |
+#            results
+#            .test_report.xml
+#        # Use always() to always run this step to publish tests results when there are tests failures
+#        if: ${{ always() }}
+#      - name: 🖊️ Write job summary
+#        run: |
+#          echo "# 🧪 Test summary for python ${{ matrix.python-version }}-${{matrix.os}}" >> $GITHUB_STEP_SUMMARY
+#          if [[ "${{matrix.os}}" == "windows-latest" ]]
+#          then
+#            type results/test-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md >> $GITHUB_STEP_SUMMARY
+#          else
+#            cat results/test-results-${{ matrix.python-version }}-${{matrix.os}}-summary.md >> $GITHUB_STEP_SUMMARY
+#          fi
+#        shell: bash
+#        if: ${{ always() }}
