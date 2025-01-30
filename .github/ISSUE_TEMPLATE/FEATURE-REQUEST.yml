@@ -1,5 +1,5 @@
 name: Feature Request
-description: If you miss a functionality in lightML or would like to contribute to the development of lightML, you are welcome to submit a feature request.
+description: If you miss a functionality in canaryml or would like to contribute to the development of canaryml, you are welcome to submit a feature request.
 title: "[Feature]: "
 labels: [ "✨ feature", "📋 needs review" ]
 assignees:
@@ -10,33 +10,33 @@ body:
       value: |
         Thank you for taking the time to fill out this feature request. 🚀
   - type: textarea
-    id: problem-description
+    id: context
     attributes:
-      label: ✏️ Problem Description
-      description: Describe the problem or lack of functionality that you want to address. ✨
+      label: 🌍 Context
+      description: What is the context for requesting the feature? What use case are you facing?  📝
+      placeholder: Please describe why you want to request the feature.
+  - type: textarea
+    id: feature-request
+    attributes:
+      label: 💡 Suggested Feature
+      description: What feature do you want to request or would like to have improved? What difficulties are you facing in your use case with the current implementation? 🔍
       placeholder: What is not working as desired? Which feature is missing or could be improved?
     validations:
       required: true
   - type: textarea
-    id: feature-request
+    id: suggested-implementation
     attributes:
-      label: 💡 Feature Request
-      description: What feature do you want to request or would like to have improved? 🔍
-      placeholder: Please describe the desired feature in detail.
+      label: 🚀 Suggested Implementation
+      description: How can/should the feature be solved? Which existing feature can be used to solve the request? ✨
+      placeholder: What is not working as desired? Which feature is missing or could be improved?
     validations:
       required: true
-  - type: textarea
-    id: context
-    attributes:
-      label: 🌍 Context
-      description: Describe the context or background in which the new feature or improvement would be useful. 📝
-      placeholder: Which user group or target audience would it affect? What benefits would they gain from it?
   - type: textarea
     id: additional-info
     attributes:
       label: 🔍 Additional Information
       description: Include any relevant information that could help the developers better understand your request and find a solution.
-      placeholder: 📷 Screenshots, if possible. 📋 Error logs or error messages. 🕹️ Version of the affected product being used.
+      placeholder: 📷 Screenshots, if possible. 🏷️ Version of the affected product being used.
   - type: checkboxes
     id: terms
     attributes:

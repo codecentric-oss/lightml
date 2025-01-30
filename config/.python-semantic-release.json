@@ -97,7 +97,7 @@
       "pyproject.toml:project.version"
     ],
     "version_variables": [
-      "src/lightml/__init__.py:__version__"
+      "src/canaryml/__init__.py:__version__"
     ]
   }
 }

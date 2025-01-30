@@ -29,7 +29,7 @@ jobs:
           enable-cache: true
           python-version: ${{matrix.python-version}}
           cache-dependency-glob: "**/pyproject.toml"
-      - name: 🪟 Add .local/bin to Windows PATH
+      - name: 🪟 Prepare/Setup windows environment
         if: runner.os == 'Windows'
         shell: bash
         run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
@@ -50,22 +50,11 @@ jobs:
         if: always()
         uses: pmeier/pytest-results-action@main
         with:
-          # A list of JUnit XML files, directories containing the former, and wildcard
-          # patterns to process.
-          # See @actions/glob for supported patterns.
           path: ./junit.xml
-
-          # (Optional) Add a summary of the results at the top of the report
           summary: true
-
-          # (Optional) Select which results should be included in the report.
           # Follows the same syntax as `pytest -r`
           display-options: fEX
-
-          # (Optional) Fail the workflow if no JUnit XML was found.
           fail-on-empty: true
-
-          # (Optional) Title of the test results section in the workflow summary
           title: Test results
       - name: ✏️ Write test result as comment
         uses: MishaKav/pytest-coverage-comment@v1
@@ -82,9 +71,15 @@ jobs:
           junitxml-path: ./junit.xml
           junitxml-title: Pytest summary
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔍Check if coverage report already exists
+        id: check-existing-artifact
+        uses: LIT-Protocol/artifact-exists-action@v0
+        with:
+          name: code-coverage-report-${{github.event.pull_request.number}}
       - name: ⬆️ Upload coverage report
+        if: steps.check-existing-artifact.outputs.exists == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report-${{matrix.python-version}}-${{matrix.os}}
+          name: code-coverage-report-${{github.event.pull_request.number}}
           path: ./coverage.xml
 

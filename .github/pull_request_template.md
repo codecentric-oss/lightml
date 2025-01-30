@@ -2,10 +2,6 @@
 
 Please describe your changes in detail and provide any necessary context.
 
-## 👀 Affected Areas
-
-Please indicate which areas of the project are affected by your changes (e.g. pipelines, tests, documentation).
-
 ## 📝 Checklist
 
 Please make sure you've completed the following tasks before submitting this pull request:
@@ -16,7 +12,6 @@ Please make sure you've completed the following tasks before submitting this pul
 - [ ] All tests ran successfully
 - [ ] All merge conflicts are resolved
 - [ ] Documentation has been updated to reflect the changes
-- [ ] Any necessary migrations have been run
 
 ## 📌 Related Issues
 

@@ -14,7 +14,7 @@ it follows the following logic:
 #}{%    include "unreleased_changes.md.j2"
 -%}{#
     #   # Since this is initialization, we are generating all the previous
-    #   # release notes per version. The very first release notes is specialized.
+    #   # release notes per version. The very first release note is specialized.
     #   # We also have non-conformative commits, so insert manual write-ups.
 #}{%    if releases | length > 0
 %}{%      for release in releases

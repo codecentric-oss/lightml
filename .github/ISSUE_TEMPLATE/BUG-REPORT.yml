@@ -1,5 +1,5 @@
 name: Bug Report
-description: Have you discovered an error during the development or use of lightML? Please let us know in the form of a bug report.
+description: Have you discovered an error during the development or use of canaryml? Please let us know in the form of a bug report.
 title: "[Bug]: "
 labels: [ "🪲 bug", "📋 needs review" ]
 assignees:
