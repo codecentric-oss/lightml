@@ -1,0 +1,6 @@
+{% if unreleased_commits | length > 0 %}
+## Unreleased
+
+{% set commit_objects = unreleased_commits %}
+{% include "changes.md.j2" -%}{{ "\n" }}
+{% endif %}

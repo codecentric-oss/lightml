@@ -1,0 +1,85 @@
+name: 🧪 pytest
+
+on:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+  workflow_call:
+permissions:
+  id-token: write
+  contents: write
+  checks: write
+  pull-requests: write
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        python-version: [ "3.10", "3.11", "3.12","3.13", "3.14" ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    name: 🧪 Run pytests wit ${{matrix.python-version}} on ${{matrix.os}}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+      - name: 🧙‍♂️Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+          python-version: ${{matrix.python-version}}
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: 🪟 Prepare/Setup windows environment
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
+      - name: 🧙‍Install tox
+        run: uv tool install --python-preference only-managed --python 3.14 tox --with tox-uv --with tox-gh
+      - name: 🐍 Install Python
+        if: matrix.env != '3.14'
+        run: uv python install --python-preference only-managed ${{ matrix.env }}
+      - name: 🛠️Setup test suite
+        run: tox run --notest --skip-missing-interpreters false
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      - name: 🏃 Run test suite
+        run: tox run --skip-pkg-install
+        env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
+      - name: 📃 Test results
+        if: always()
+        uses: pmeier/pytest-results-action@main
+        with:
+          path: ./junit.xml
+          summary: true
+          # Follows the same syntax as `pytest -r`
+          display-options: fEX
+          fail-on-empty: true
+          title: Test results
+      - name: ✏️ Write test result as comment
+        uses: MishaKav/pytest-coverage-comment@v1
+        with:
+          pytest-xml-coverage-path: ./coverage.xml
+          title: Coverage Report
+          badge-title: Code Coverage
+          hide-badge: false
+          hide-report: false
+          create-new-comment: false
+          hide-comment: false
+          report-only-changed-files: true
+          remove-link-from-badge: false
+          junitxml-path: ./junit.xml
+          junitxml-title: Pytest summary
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔍Check if coverage report already exists
+        id: check-existing-artifact
+        uses: LIT-Protocol/artifact-exists-action@v0
+        with:
+          name: code-coverage-report-${{github.event.pull_request.number}}
+      - name: ⬆️ Upload coverage report
+        if: steps.check-existing-artifact.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-${{github.event.pull_request.number}}
+          path: ./coverage.xml
+

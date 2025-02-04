@@ -1,9 +1,40 @@
 [project]
-name = "lightml"
+name = "canaryml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Welcome to CanaryML 👋, a python-based framework to speed up the implementation and customization of your Machine Learning project 🧠."
+authors = [
+    { name = "Denis Stalz-John", email = "denis.stalz-john@codecentric.de" },
+    { name = "Nils Uhrberg", email = "nils.uhrberg@codecentric.de" },
+    { name = "Anke Koke", email = "anke.koke@codecentric.de" }
+]
 readme = "README.md"
 requires-python = ">=3.10"
+line-length = 100
+indent-width = 4
+keywords = ["tensorflow", "keras", "scikit-learn", "torch", "MLOps", "Deep Learning", "Machine Learning", "Computer Vision"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed"
+]
+
 dependencies = []
 
 [dependency-groups]
@@ -12,3 +43,54 @@ dev = [
     "pytest>=8.3.4",
     "python-semantic-release>=9.15.2",
 ]
+
+[project.urls]
+Repository = "https://github.com/codecentric-oss/canaryml.git"
+Issues = "https://github.com/codecentric-oss/canaryml/issues"
+Changelog = "https://github.com/codecentric-oss/canaryml/blob/main/CHANGELOG.md"
+
+
+[tool.ruff]
+fixable = ["E", "F", "D", "PT", "PL"]
+exclude = ["./tests/**"]
+
+
+[tool.ruff.lint]
+select = ["E", "F", "D100", "D101", "D102", "D103", "D105", "D106", "D107", "PT", "PL"]
+fixable = ["ALL"]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

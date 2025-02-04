@@ -1,0 +1,70 @@
+name: 📦 Create Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+jobs:
+  release:
+    if: ${{ github.event.pull_request.merged }}
+    name: 🏗️ Build package and publish to pypi
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/canaryml
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🐍Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - name: 🧙‍♂️Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: 🔨Install dependencies
+        run: uv sync --all-extras --dev
+      - name: ⬇️ Download current coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-report-${{github.event.pull_request.number}}
+          path: ./coverage.xml
+      - name: 📃Pytest coverage report
+        id: coverageComment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          hide-comment: true
+          pytest-xml-coverage-path: ./coverage.xml
+
+      - name: ✏️ Update Readme with Coverage Badge
+        run: |
+          sed -i '/<!-- Pytest Coverage Comment:Begin -->/,/<!-- Pytest Coverage Comment:End -->/c\<!-- Pytest Coverage Comment:Begin -->\n\${{ steps.coverageComment.outputs.coverageHtml }}\n<!-- Pytest Coverage Comment:End -->' ./README.md
+
+      - name: 🚀 Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          root_options: "-c config/.python-semantic-release.json"
+
+
+      - name: 🐍 Publish package distributions to PyPI
+        if: steps.release.outputs.released == 'true'
+        run: uv publish
+
+      - name: 🐙 Publish package distributions to GitHub Releases
+        uses: python-semantic-release/publish-action@9
+        if: steps.release.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
