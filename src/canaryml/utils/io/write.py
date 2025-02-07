@@ -10,7 +10,7 @@ import pandas as pd
 
 
 def write_parquet(
-    dataframe: pd.DataFrame,
+    data: pd.DataFrame,
     filepath: str,
     compression: str | None = "gzip",
     file_system: AbstractFileSystem | None = None,
@@ -20,7 +20,7 @@ def write_parquet(
     Writes dataframe to parquet file with optional AbstractFileSystem given
 
     Args:
-        dataframe: Dataframe to write to parquet file
+        data: Dataframe to write to parquet file
         filepath: Path to save the parquet file to
         compression: Compression method
         file_system: Allow the function to be used with different file systems; default = local
@@ -33,7 +33,7 @@ def write_parquet(
     )
     fastparquet.write(
         filepath,
-        dataframe,
+        data,
         open_with=cur_fs.open,
         compression=compression,
         **kwargs,
@@ -135,3 +135,6 @@ def write_yaml(
     )
     with cur_fs.open(filepath, "w", encoding="utf-8") as file:
         yaml.dump(data, file, Dumper=yaml.SafeDumper, **kwargs)
+
+
+__all__ = ["write_image", "write_json", "write_csv", "write_yaml"]

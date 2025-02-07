@@ -1,31 +1,8 @@
-# Copyright (c) codecentric AG 2025. All Rights Reserved.
-#
-# Licensed under the MIT License. See the LICENSE file in the project root for more information.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# 1. The above copyright notice and this permission notice shall be included in
-#    all copies or substantial portions of the Software.
-#
-# 2. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#    SOFTWARE.
-
-
 """Module for helper functions for io operations"""
 
 import json
 from os.path import join, relpath, splitext
-from typing import List, Optional, Any, Tuple
+from typing import List, Optional, Any
 
 import fastparquet
 import numpy as np
@@ -43,8 +20,8 @@ def list_dir(
     path: str,
     return_full_path: bool = False,
     recursive: bool = False,
-    file_system: Optional[AbstractFileSystem] = None,
-    filter_ext: Optional[List[str]] = None,
+    file_system: AbstractFileSystem | None = None,
+    filter_ext: list[str] | None = None,
 ) -> List[str]:
     """
     Returns a list of files in a directory
@@ -75,7 +52,7 @@ def list_dir(
                 )
             ]
 
-    if filter_ext is not None:
+    if filter_ext is not None and len(filter_ext) > 0:
         files = [cur_file for cur_file in files if splitext(cur_file)[1] in filter_ext]
 
     if return_full_path:
@@ -85,7 +62,7 @@ def list_dir(
 
 
 def read_parquet(
-    filepath: str, file_system: Optional[AbstractFileSystem] = None
+    filepath: str, file_system: AbstractFileSystem | None = None
 ) -> pd.DataFrame:
     """
     Reads parquet with optional AbstractFileSystem given
@@ -103,7 +80,7 @@ def read_parquet(
     return fastparquet.ParquetFile(filepath, fs=cur_fs).to_pandas()
 
 
-def read_yaml(filepath: str, file_system: Optional[AbstractFileSystem] = None) -> dict:
+def read_yaml(filepath: str, file_system: AbstractFileSystem | None = None) -> dict:
     """
     Reads a yaml file with optional AbstractFileSystem given
 
@@ -121,7 +98,7 @@ def read_yaml(filepath: str, file_system: Optional[AbstractFileSystem] = None) -
         return yaml.load(file, Loader=yaml.SafeLoader)
 
 
-def read_json(filepath: str, file_system: Optional[AbstractFileSystem] = None) -> dict:
+def read_json(filepath: str, file_system: AbstractFileSystem | None = None) -> dict:
     """
     Reads a json file with optional AbstractFileSystem given
 
@@ -140,7 +117,7 @@ def read_json(filepath: str, file_system: Optional[AbstractFileSystem] = None) -
 
 
 def read_csv(
-    filepath: str, file_system: Optional[AbstractFileSystem] = None, **kwargs
+    filepath: str, file_system: AbstractFileSystem | None = None, **kwargs
 ) -> pd.DataFrame:
     """Reads csv with optional AbstractFileSystem given
 
@@ -160,7 +137,7 @@ def read_csv(
 
 def read_image(
     filepath: str,
-    file_system: Optional[AbstractFileSystem] = None,
+    file_system: AbstractFileSystem | None = None,
     as_array: bool = False,
     resize_to: ImageSize | None = None,
     **kwargs,
@@ -179,7 +156,7 @@ def read_image(
     if not cur_fs.exists(filepath):
         raise FileNotFoundError(f"ImageFile not found: {filepath}")
 
-    with file_system.open(filepath, "rb") as file:
+    with cur_fs.open(filepath, "rb") as file:
         image = Image.open(file, **kwargs).copy()
         if resize_to is not None:
             image = image.resize(size=resize_to.to_pil_size())
@@ -197,9 +174,9 @@ def find_and_read_file(
     filepath: str,
     read_func,
     search_paths: Optional[List[str]] = None,
-    file_system: Optional[AbstractFileSystem] = None,
+    file_system: AbstractFileSystem | None = None,
     **kwargs,
-) -> Tuple[str, Any]:
+) -> str | Any:
     """
     Tries to find a file in a list of search paths and reads it with given read function
 
@@ -221,3 +198,13 @@ def find_and_read_file(
         if cur_fs.exists(cur_path):
             return cur_path, read_func(cur_path, file_system=cur_fs, **kwargs)
     raise FileNotFoundError(f"File not found: {filepath}")
+
+
+__all__ = [
+    "list_dir",
+    "read_parquet",
+    "read_yaml",
+    "read_json",
+    "read_image",
+    "find_and_read_file",
+]
