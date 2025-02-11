@@ -1,7 +1,7 @@
 import pandas as pd
 
 from canaryml.dataset import Dataset
-from lightml.trainer.trainer import Trainer
+from canaryml.trainer.trainer import Trainer
 
 
 def train_and_evaluate(

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from canaryml.datadescriptions.data_description import DataDescription
-from lightml.utils.images.image_size import ImageSize
+from canaryml.utils.image import ImageSize
 
 
 @dataclass

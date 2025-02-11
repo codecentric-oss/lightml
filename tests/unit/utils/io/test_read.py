@@ -1,3 +1,4 @@
+import os
 from os.path import join
 from pathlib import Path
 
@@ -23,7 +24,10 @@ from canaryml.utils.io.read import (
 
 @pytest.fixture()
 def location_config(tmp_path: Path) -> dict:
-    return {"uri": join(str(tmp_path), "test_io_read")}
+    path = join(str(tmp_path), "test_io_read")
+    os.makedirs(path, exist_ok=True)
+    loc_dict = {"uri": path}
+    return loc_dict
 
 
 @pytest.fixture(autouse=True)

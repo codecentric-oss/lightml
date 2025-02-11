@@ -12,8 +12,8 @@ from fsspec import AbstractFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from PIL import Image
 
-from lightml.utils.images.image_size import ImageSize
-from lightml.utils.io.location import join_fs_path
+from canaryml.utils.image import ImageSize
+from canaryml.utils.io.location_config import join_fs_path
 
 
 def list_dir(

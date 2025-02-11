@@ -28,4 +28,4 @@ class CategoryDataDescription(DataDescription):
         return False
 
     def __getitem__(self, index: int) -> str:
-        return self.names.[index]
+        return self.names[index]
