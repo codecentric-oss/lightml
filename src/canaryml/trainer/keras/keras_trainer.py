@@ -1,3 +1,4 @@
+import inspect
 from copy import deepcopy
 from os.path import splitext
 from typing import Any
@@ -70,9 +71,9 @@ class KerasTrainer(Trainer):
         input_data_description: DataDescription,
         target_data_description: DataDescription,
         batch_size: int,
-        loss_fn: str,
-        optimizer: str,
-        metrics: list[dict[str, Any]] | None = None,
+        loss_fn: str | losses.Loss,
+        optimizer: str | optimizers.Optimizer,
+        metrics: list[dict[str, Any]] | list[callable] | None = None,
         loss_fn_kwargs: dict | None = None,
         optimizer_kwargs: dict | None = None,
         steps_per_epoch: int | None = None,
@@ -85,25 +86,74 @@ class KerasTrainer(Trainer):
             target_data_description=target_data_description,
         )
         self.batch_size = batch_size
-        self.loss_fn_name = loss_fn
-        self.loss_fn_kwargs = loss_fn_kwargs
-        self.loss_fn = create_loss_function(
-            loss_fn_name=self.loss_fn_name, loss_fn_kwargs=loss_fn_kwargs
-        )
-        self.metrics_list = metrics or []
-        self.metrics = create_metrics(metrics=metrics)
-        self.optimizer_name = optimizer
-        self.optimizer_kwargs = optimizer_kwargs
+        self._get_loss_fn(loss_fn, loss_fn_kwargs)
 
-        self.optimizer = create_optimizer(
-            optimizer_name=optimizer, optimizer_kwargs=optimizer_kwargs
-        )
+        self._get_metrics(metrics)
+
+        self._get_optimizer(optimizer, optimizer_kwargs)
 
         self.steps_per_epoch = steps_per_epoch
         self.steps_per_epoch = steps_per_epoch
         self.validation_steps = validation_steps
         self.model: Model | None = None
         self.shuffle = shuffle
+
+    def _get_optimizer(self, optimizer, optimizer_kwargs):  # TODO: Add test
+        if isinstance(optimizer, str):
+            self.optimizer_name = optimizer
+            self.optimizer_kwargs = optimizer_kwargs
+            self.optimizer = create_optimizer(
+                optimizer_name=optimizer, optimizer_kwargs=optimizer_kwargs
+            )
+        else:
+            self.optimizer_name = optimizer.name
+            self.optimizer = optimizer
+            self.optimizer_kwargs = self._get_kwargs_from_obj(obj=optimizer)
+
+    def _get_metrics(self, metrics):  # TODO: Add test
+        if isinstance(metrics, list) and len(metrics) > 0:
+            if isinstance(metrics[0], dict):
+                self.metric_names = [metric["metric_name"] for metric in metrics]
+                self.metrics_list = metrics
+                self.metrics = create_metrics(metrics=metrics)
+            else:
+                self.metrics = metrics
+                self.metrics_list = []
+                self.metric_names = []
+                for metric in self.metrics:
+                    self.metric_names.append(metric.__name__)
+                    metric_kwargs = {"metric_name": metric.__name__}
+                    metric_kwargs.update(**self._get_kwargs_from_obj(obj=metric))
+                    self.metrics_list.append(metric_kwargs)
+        else:
+            self.metrics = []
+            self.metrics_list = []
+
+    def _get_loss_fn(self, loss_fn, loss_fn_kwargs):  # TODO: Add test
+        if isinstance(loss_fn, str):
+            self.loss_fn_name = loss_fn
+            self.loss_fn = create_loss_function(
+                loss_fn_name=self.loss_fn_name, loss_fn_kwargs=loss_fn_kwargs
+            )
+            self.loss_fn_kwargs = loss_fn_kwargs
+        else:
+            self.loss_fn = loss_fn
+            self.loss_fn_name = loss_fn.name
+            self.loss_fn_kwargs = self._get_kwargs_from_obj(obj=loss_fn)
+
+    @staticmethod
+    def _get_kwargs_from_obj(obj: any) -> dict:  # TODO: Add test
+        kwargs = {}
+        for kwarg in inspect.signature(
+            obj.__class__ if not callable(obj) else obj
+        ).parameters.keys():
+            if kwarg not in ["args", "kwargs"]:
+                try:
+                    argument_value = getattr(obj, kwarg)
+                except AttributeError:
+                    continue
+                kwargs[kwarg] = argument_value
+        return kwargs
 
     def train(self, dataset: Dataset, epochs: int, **kwargs):
         from loguru import logger
