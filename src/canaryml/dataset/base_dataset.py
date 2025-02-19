@@ -42,38 +42,84 @@ class Dataset(ABC):
         Initialize the Dataset.
 
         Args:
-            data (pd.DataFrame): The input data as a pandas DataFrame.
-            id_column (str, optional): The name of the ID column. Defaults to "ID".
+            data: The input data as a pandas DataFrame.
+            input_data_description: DataDescription of the input data.
+            target_data_description: DataDescription of the target data.
+            id_column: The name of the ID column. Defaults to "ID".
+            use_augmentation: Indicates whether to use data augmentation. Defaults to False.
         """
         self.data = data
         self.id_column = id_column
         self.input_data_description = input_data_description
         self.target_data_description = target_data_description
         self.use_augmentation = use_augmentation
+        self._train_subset = None
+        self._validation_subset = None
+        self._test_subset = None
 
     @property
     def validation_subset(self) -> "Dataset":
-        if DatasetColumnNames.SUBSET.value in self.data.columns:
-            return self[
-                self[DatasetColumnNames.SUBSET.value] == Subset.VALIDATION.value
-            ]
-        raise MissingSubsetError()
+        """
+        Get the validation subset of the dataset.
+
+        Returns:
+            A new Dataset instance containing only the validation data.
+
+        Raises:
+            MissingSubsetError: If the validation subset is missing in the dataset.
+        """
+        if self._validation_subset is None:
+            if DatasetColumnNames.SUBSET.value in self.data.columns:
+                validation_subset = self[
+                    self[DatasetColumnNames.SUBSET.value] == Subset.VALIDATION.value
+                ]
+                self._validation_subset = validation_subset
+                return validation_subset
+            raise MissingSubsetError()
+        return self._validation_subset
 
     @property
     def test_subset(self) -> "Dataset":
-        if DatasetColumnNames.SUBSET.value in self.data.columns:
-            return self[self[DatasetColumnNames.SUBSET.value] == Subset.TEST.value]
-        raise MissingSubsetError()
+        """
+        Get the test subset of the dataset.
+
+        Returns:
+            Dataset: A new Dataset instance containing only the test data.
+
+        Raises:
+            MissingSubsetError: If the test subset is missing in the dataset.
+        """
+        if self._test_subset is None:
+            if DatasetColumnNames.SUBSET.value in self.data.columns:
+                test_subset = self[
+                    self[DatasetColumnNames.SUBSET.value] == Subset.TEST.value
+                ]
+                self._test_subset = test_subset
+                return test_subset
+            raise MissingSubsetError()
+        return self._test_subset
 
     @property
     def train_subset(self) -> "Dataset":
-        if DatasetColumnNames.SUBSET.value in self.data.columns:
-            train_subset = self[
-                self[DatasetColumnNames.SUBSET.value] == Subset.TRAIN.value
-            ]
-            train_subset.use_augmentation = True
-            return train_subset
-        raise MissingSubsetError()
+        """
+        Get the training subset of the dataset.
+
+        Returns:
+            Dataset: A new Dataset instance containing only the training data.
+
+        Raises:
+            MissingSubsetError: If the training subset is missing in the dataset.
+
+        """
+        if self._train_subset is None:
+            if DatasetColumnNames.SUBSET.value in self.data.columns:
+                train_subset = self[
+                    self[DatasetColumnNames.SUBSET.value] == Subset.TRAIN.value
+                ]
+                self._train_subset = train_subset
+                return train_subset
+            raise MissingSubsetError()
+        return self._train_subset
 
     def __getitem__(self, key):
         """
